@@ -14,23 +14,28 @@ from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import train_test_split
 
 #read csv and label columns since default adds a space before some names
-df = pd.read_csv('training_data/data-1_train.csv', names=['example_id', 'text', 'aspect_term', 'term_location', 'classy'])
-#remove the first row since it's header duplication
-df = df.drop([0], axis=0)
+df1 = pd.read_csv('training_data/data-1_train.csv', names=['example_id', 'text', 'aspect_term', 'term_location', 'classy'])
+df2 = pd.read_csv('training_data/data-2_train.csv', names=['example_id', 'text', 'aspect_term', 'term_location', 'classy'])
 
+#remove the first row since it's header duplication
+df1 = df1.drop([0], axis=0)
+df2 = df2.drop([0], axis=0)
+
+dataframe = df1.append(df2)
 
 # In[16]:
-
-
 stopset = set(stopwords.words('english'))
-# stopset.add('[comma]')
-y = df.classy
+stopset.add('[comma]')
+y = dataframe.classy
+print(len(y))
 vectorizer = CountVectorizer(stop_words=stopset)
-X = vectorizer.fit_transform(df.text)
-print(X.toarray())
+X = vectorizer.fit_transform(dataframe.text)
+print(X.shape)
 
 #split training vs test data
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.3)
+
+
 
 model = naive_bayes.MultinomialNB()
 model.fit(X_train, y_train)
@@ -46,7 +51,7 @@ for i in range (len(actual)):
     if pred[i] == actual [i]:
         count = count + 1
 
-        
+
 print(count)
 print(len(pred))
 print(count/len(pred))
@@ -65,7 +70,3 @@ print(count/len(pred))
 
 
 # In[ ]:
-
-
-
-
