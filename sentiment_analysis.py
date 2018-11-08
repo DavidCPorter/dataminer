@@ -9,8 +9,8 @@ import numpy as np
 import nltk
 from nltk.corpus import stopwords
 from sklearn import naive_bayes
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.metrics import roc_auc_score
+from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
+from sklearn.metrics import roc_auc_score, precision_recall_fscore_support
 from sklearn.model_selection import train_test_split
 
 #read csv and label columns since default adds a space before some names
@@ -52,21 +52,21 @@ for i in range (len(actual)):
         count = count + 1
 
 
-print(count)
-print(len(pred))
+print("Naive Bayes accuracy:")
 print(count/len(pred))
+print("Naive Bayes precision, recall, fscore")
+print(precision_recall_fscore_support(actual, pred, average='weighted'))
 
 
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
+# svm try
+svm_model = svm.SVC(gamma='scale')
+svm_model.fit(X_train, y_train)
+svmpred = svm_model.predict(X_test)
+count = 0
+for i in range(len(actual)):
+    if svmpred[i] == actual[i]:
+        count = count + 1
+print("svm accuracy:")
+print(count / len(svmpred))
+print("svm precision, recall, fscore")
+print(precision_recall_fscore_support(actual, svmpred, average='weighted'))
