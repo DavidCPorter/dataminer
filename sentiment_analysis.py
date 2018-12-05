@@ -9,10 +9,15 @@ import numpy as np
 import nltk
 from nltk.corpus import stopwords
 from sklearn import naive_bayes
+<<<<<<< HEAD
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics import roc_auc_score
 from sklearn.metrics import f1_score
 
+=======
+from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
+from sklearn.metrics import roc_auc_score, precision_recall_fscore_support
+>>>>>>> 2d044970904bebc0eb6752df1a36399161d84d63
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import KFold
@@ -160,18 +165,21 @@ print("F-score_neutral=", 2*((neutral_count/precision_neu_total)*(neutral_count/
 print("F-score_positive=", 2*((positive_count/precision_p_total)*(positive_count/p_total))/((positive_count/precision_p_total)+(positive_count/p_total)))
 
 
+print("Naive Bayes accuracy:")
+print(count/len(pred))
+print("Naive Bayes precision, recall, fscore")
+print(precision_recall_fscore_support(actual, pred, average='weighted'))
 
 
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
+# svm try
+svm_model = svm.SVC(gamma='scale')
+svm_model.fit(X_train, y_train)
+svmpred = svm_model.predict(X_test)
+count = 0
+for i in range(len(actual)):
+    if svmpred[i] == actual[i]:
+        count = count + 1
+print("svm accuracy:")
+print(count / len(svmpred))
+print("svm precision, recall, fscore")
+print(precision_recall_fscore_support(actual, svmpred, average='weighted'))
