@@ -14,6 +14,12 @@ from sklearn.metrics import roc_auc_score, precision_recall_fscore_support, f1_s
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import KFold
+from keras import backend as K
+from DFS import DFS
+from keras.utils import to_categorical
+from nltk.stem import PorterStemmer
+nltk.download('wordnet')
+
 
 
 
@@ -131,9 +137,9 @@ def nb_trainNtest():
     print("F-score_neutral=", 2*((neutral_count/precision_neu_total)*(neutral_count/neu_total))/((neutral_count/precision_neu_total)+(neutral_count/neu_total)))
     print("F-score_positive=", 2*((positive_count/precision_p_total)*(positive_count/p_total))/((positive_count/precision_p_total)+(positive_count/p_total)))
 
-
+    count = negative_count+positive_count+neutral_count
     print("Naive Bayes accuracy:")
-    # print(count/len(pred))
+    print(count/len(pred))
     print("Naive Bayes precision, recall, fscore")
     print(precision_recall_fscore_support(actual, pred, average='weighted'))
 
@@ -166,8 +172,6 @@ def nb_for_demo(demo_file):
 
 
 
-
-
 # svm try
 def svm_trainNtest():
     svm_model = svm.SVC(gamma='scale')
@@ -184,8 +188,27 @@ def svm_trainNtest():
 
 
 
+def dfs_trainNtest(dfs_y_train, dfs_y_test):
+    model = DFS(in_dim = vocab_size, num_classes = 2, lambda1 = 0.04) #
+    print(dfs_y_train)
+    print(X_train)
+    # prints
+    model.fit(X_train, dfs_y_train, epochs = 10, batch_size = 100, validation_data = [X_test, dfs_y_test])
+    print(model.accuracy(X_test, dfs_y_test))
+    print(model.write_predictions("dfs_results.txt", X_test, dfs_y_test))
+
+
 
 # **PREPROCESSING**
+from nltk import word_tokenize
+from nltk.stem import WordNetLemmatizer
+class LemmaTokenizer(object):
+     def __init__(self):
+         self.wnl = WordNetLemmatizer()
+     def __call__(self, doc):
+         return [self.wnl.lemmatize(t) for t in word_tokenize(doc)]
+
+
 
 #read csv and label columns since default adds a space before some names
 df1 = pd.read_csv('training_data/data-1_train.csv', names=['example_id', 'text', 'aspect_term', 'term_location', 'classy'])
@@ -200,21 +223,36 @@ dataframe = df1.append(df2)
 # In[16]:
 stopset = set(stopwords.words('english'))
 stopset.add('[comma]')
-vectorizer = CountVectorizer(stop_words=stopset)
+
+# dataframe.text = dataframe.text.apply(lemmatize_text)
+
+
+
+vectorizer = CountVectorizer(tokenizer=LemmaTokenizer(), stop_words=stopset)
 X = vectorizer.fit_transform(dataframe.text)
-print(X)
+vocab_size = len(vectorizer.get_feature_names())
 # X1 = vectorizer.fit_transform(df1.text)
 # X2 = vectorizer.fit_transform(df2.text)
 y = dataframe.classy
 # y1 = df1.classy
 # y2 = df2.classy
+y_dfs = dataframe.classy
+y_dfs = to_categorical(y_dfs)
+print(y)
+
 
 # Training on both provided data sets (X, y)... why not?
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.3)
 # nb_trainNtest()
+print(y_train)
+
+# X_train, X_test, dfs_y_train, dfs_y_test = train_test_split(X, y_dfs, test_size = 0.3)
+
 #
 # NEED to change demo_file string on demo day
 demo_filename = 'training_data/data-1_train.csv'
-
+#
+nb_trainNtest()
 nb_for_demo(demo_filename)
+# dfs_trainNtest(dfs_y_train, dfs_y_test)
 # svm_trainNtest()
