@@ -22,6 +22,14 @@ nltk.download('wordnet')
 
 
 
+from nltk.stem.snowball import SnowballStemmer
+
+stemmer = SnowballStemmer("english", ignore_stopwords=True)
+class StemmedCountVectorizer(CountVectorizer):
+    def build_analyzer(self):
+        analyzer = super(StemmedCountVectorizer, self).build_analyzer()
+        return lambda doc: ([stemmer.stem(w) for w in analyzer(doc)])
+
 
 # this doesn't work but it doesn't matter anymore since it was only asked for the presentation for nb and they will provide their own evaluation during the demo. But we could use kfold for the writeup as a secondary evaluator to our model.
 def nb_trainNtest_10fold():
@@ -218,19 +226,45 @@ df2 = pd.read_csv('training_data/data-2_train.csv', names=['example_id', 'text',
 df1 = df1.drop([0], axis=0)
 df2 = df2.drop([0], axis=0)
 
-dataframe = df1.append(df2)
+# dataframe = df1.append(df2)
+
+dataframe = df1
+
 
 # In[16]:
 stopset = set(stopwords.words('english'))
 stopset.add('[comma]')
+# stopset.add('good')
+# stopset.add('laptop')
+# stopset.add('computer')
+# stopset.add('food')
+# stopset.add('dinner')
+# stopset.add('lunch')
+# stopset.add('breakfast')
+tokenized_stop_words = ["'d", "'ll", "'re", "'s", "'ve", '[', ']', 'comma', 'could', 'doe', 'ha', 'might', 'must', "n't", 'need', 'sha', 'wa', 'wo', 'would']
+
+aspect_term_list = dataframe.aspect_term
+
+for i in tokenized_stop_words:
+    stopset.add(i)
+
+# for i in aspect_term_list:
+#     stopset.add(i)
+
+print(stopset)
+
+
+
+
 
 # dataframe.text = dataframe.text.apply(lemmatize_text)
 
 
 
-vectorizer = CountVectorizer(tokenizer=LemmaTokenizer(), stop_words=stopset)
+vectorizer = StemmedCountVectorizer(tokenizer=LemmaTokenizer(), strip_accents = 'unicode', stop_words=stopset)
 X = vectorizer.fit_transform(dataframe.text)
 vocab_size = len(vectorizer.get_feature_names())
+print(vectorizer.get_feature_names())
 # X1 = vectorizer.fit_transform(df1.text)
 # X2 = vectorizer.fit_transform(df2.text)
 y = dataframe.classy
@@ -238,13 +272,13 @@ y = dataframe.classy
 # y2 = df2.classy
 y_dfs = dataframe.classy
 y_dfs = to_categorical(y_dfs)
-print(y)
+# print(y)
 
 
 # Training on both provided data sets (X, y)... why not?
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.3)
 # nb_trainNtest()
-print(y_train)
+# print(y_train)
 
 # X_train, X_test, dfs_y_train, dfs_y_test = train_test_split(X, y_dfs, test_size = 0.3)
 
