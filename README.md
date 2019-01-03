@@ -78,3 +78,8 @@ Acknowledge us if you have any queries!
 Best wishes!
 Sahisnu & Shuai
 #pin
+
+
+**Solution Write-up:**
+
+https://docs.google.com/document/d/1q5Ab0NS1YUOTAzIPWkxvy0iRcxJWpopDw5xigTqBtCM/edit?usp=sharing
